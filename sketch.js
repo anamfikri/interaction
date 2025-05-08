@@ -2,46 +2,48 @@ let particles = [];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  clear(); // memastikan canvas awalnya transparan
 }
 
 function draw() {
-  clear();
-  for (let i = 0; i < 5; i++) {
-    particles.push(new SmokeParticle(mouseX, mouseY));
-  }
+  clear(); // menjaga latar tetap transparan setiap frame
+
+  particles.push(new Particle(mouseX, mouseY));
 
   for (let i = particles.length - 1; i >= 0; i--) {
     let p = particles[i];
     p.update();
-    p.display();
-    if (p.isDead()) {
+    p.show();
+    if (p.finished()) {
       particles.splice(i, 1);
     }
   }
 }
 
-class SmokeParticle {
+class Particle {
   constructor(x, y) {
-    this.pos = createVector(x, y);
-    this.vel = createVector(random(-1, 1), random(-2, -0.5));
-    this.acc = createVector(0, -0.02);
-    this.lifespan = 255;
+    this.x = x;
+    this.y = y;
+    this.alpha = 255;
+    this.r = random(10, 20);
+    this.xSpeed = random(-1, 1);
+    this.ySpeed = random(-1, -2);
+  }
+
+  finished() {
+    return this.alpha < 0;
   }
 
   update() {
-    this.vel.add(this.acc);
-    this.pos.add(this.vel);
-    this.lifespan -= 2;
+    this.x += this.xSpeed;
+    this.y += this.ySpeed;
+    this.alpha -= 4;
   }
 
-  display() {
+  show() {
     noStroke();
-    fill(200, this.lifespan);
-    ellipse(this.pos.x, this.pos.y, 20);
-  }
-
-  isDead() {
-    return this.lifespan < 0;
+    fill(200, this.alpha);
+    ellipse(this.x, this.y, this.r);
   }
 }
 
