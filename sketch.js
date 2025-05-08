@@ -1,6 +1,6 @@
 let particles = [];
 let lastMoveTime = 0;
-let mouseInCanvas = false;
+let userIsTouching = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -11,10 +11,19 @@ function draw() {
   clear();
 
   const now = millis();
-  const mouseIdle = now - lastMoveTime > 200;
+  const mouseIdle = now - lastMoveTime > 1000;
 
-  if (!mouseIdle && mouseInCanvas) {
-    particles.push(new Particle(mouseX, mouseY));
+  let currentX = mouseX;
+  let currentY = mouseY;
+
+  if (touches.length > 0) {
+    currentX = touches[0].x;
+    currentY = touches[0].y;
+  }
+
+  // Spawn particle jika user menyentuh atau mouse aktif
+  if (!mouseIdle && (userIsTouching || mouseIsInsideCanvas())) {
+    particles.push(new Particle(currentX, currentY));
   }
 
   for (let i = particles.length - 1; i >= 0; i--) {
@@ -26,7 +35,7 @@ function draw() {
     }
   }
 
-  if (mouseIdle && !mouseInCanvas) {
+  if (mouseIdle && !userIsTouching && !mouseIsInsideCanvas()) {
     particles = [];
   }
 }
@@ -60,15 +69,25 @@ class Particle {
 
 function mouseMoved() {
   lastMoveTime = millis();
-  mouseInCanvas = true;
 }
 
-function mouseOut() {
-  mouseInCanvas = false;
+function touchStarted() {
+  userIsTouching = true;
+  lastMoveTime = millis();
+  return false; // mencegah scroll
 }
 
-function mouseOver() {
-  mouseInCanvas = true;
+function touchMoved() {
+  lastMoveTime = millis();
+  return false;
+}
+
+function touchEnded() {
+  userIsTouching = false;
+}
+
+function mouseIsInsideCanvas() {
+  return mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height;
 }
 
 function windowResized() {
