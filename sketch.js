@@ -1,14 +1,21 @@
 let particles = [];
+let lastMoveTime = 0;
+let mouseInCanvas = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  clear(); // memastikan canvas awalnya transparan
+  clear();
 }
 
 function draw() {
-  clear(); // menjaga latar tetap transparan setiap frame
+  clear();
 
-  particles.push(new Particle(mouseX, mouseY));
+  const now = millis();
+  const mouseIdle = now - lastMoveTime > 200;
+
+  if (!mouseIdle && mouseInCanvas) {
+    particles.push(new Particle(mouseX, mouseY));
+  }
 
   for (let i = particles.length - 1; i >= 0; i--) {
     let p = particles[i];
@@ -17,6 +24,10 @@ function draw() {
     if (p.finished()) {
       particles.splice(i, 1);
     }
+  }
+
+  if (mouseIdle && !mouseInCanvas) {
+    particles = [];
   }
 }
 
@@ -45,6 +56,19 @@ class Particle {
     fill(200, this.alpha);
     ellipse(this.x, this.y, this.r);
   }
+}
+
+function mouseMoved() {
+  lastMoveTime = millis();
+  mouseInCanvas = true;
+}
+
+function mouseOut() {
+  mouseInCanvas = false;
+}
+
+function mouseOver() {
+  mouseInCanvas = true;
 }
 
 function windowResized() {
