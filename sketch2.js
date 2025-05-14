@@ -2,15 +2,14 @@ let particles = [];
 let lastMouseMoveTime = 0;
 let gradientTextures = [];
 let transparencies = [192, 128, 64]; // 75%, 50%, 25%
-let lastMousePos;
+let lastMousePos = null;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   noStroke();
   clear();
 
-  lastMousePos = createVector(mouseX, mouseY);
-
+  // Create gradient circle textures
   gradientTextures = [
     createGradientCircle(color('#63b86d'), color('#ffcc40')),
     createGradientCircle(color('#a379e3'), color('#ff92c2')),
@@ -37,6 +36,11 @@ function draw() {
 }
 
 function mouseMoved() {
+  if (!lastMousePos) {
+    lastMousePos = createVector(mouseX, mouseY);
+    return;
+  }
+
   if (isInsideCanvas(mouseX, mouseY)) {
     let currentPos = createVector(mouseX, mouseY);
     let movement = p5.Vector.sub(currentPos, lastMousePos);
@@ -49,6 +53,12 @@ function mouseMoved() {
 function touchMoved() {
   for (let t of touches) {
     let touchPos = createVector(t.x, t.y);
+
+    if (!lastMousePos) {
+      lastMousePos = touchPos.copy();
+      return false;
+    }
+
     let movement = p5.Vector.sub(touchPos, lastMousePos);
     spawnParticle(t.x, t.y, movement);
     lastMouseMoveTime = millis();
@@ -77,8 +87,8 @@ class Particle {
     this.tex = tex;
     this.alphaTarget = alphaTarget;
     this.alpha = 0;
-    this.fadeInDuration = 12; // 0.2s at 60fps
-    this.size = random(13, 27);
+    this.fadeInDuration = 12; // 0.2s
+    this.size = random(13, 27); // kecil
   }
 
   update() {
@@ -96,7 +106,7 @@ class Particle {
       let t = this.life / 30;
       this.alpha = this.alphaTarget * t;
     }
-    // Constant visible
+    // Normal
     else {
       this.alpha = this.alphaTarget;
     }
