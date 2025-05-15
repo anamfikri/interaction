@@ -9,26 +9,33 @@ function setup() {
   noStroke();
   clear();
 
-  // Create gradient circle textures
   gradientTextures = [
-    createGradientCircle(color('#63b86d'), color('#ffcc40')),
+    createGradientCircle(color('#63b86d'), color('#2E8B32')),
     createGradientCircle(color('#a379e3'), color('#ff92c2')),
-    createGradientCircle(color('#ffd95a'), color('#ff8b74')),
-    createGradientCircle(color('#5ca2f3'), color('#aad2eb'))
+    createGradientCircle(color('#F44336'), color('#ff8b74')),
+    createGradientCircle(color('#aad2eb'), color('#5CA2F3'))
   ];
 }
 
 function draw() {
   clear();
+  blendMode(BLEND); // Reset blending mode ke normal sebelum gambar apa pun
 
   for (let i = particles.length - 1; i >= 0; i--) {
-    let p = particles[i];
-    p.update();
-    p.display();
-    if (p.isDead()) {
+    particles[i].update();
+  }
+
+  // Gambar partikel dengan blendMode ADD untuk efek kontras warna tumpang tindih
+  blendMode(ADD);
+  for (let i = particles.length - 1; i >= 0; i--) {
+    particles[i].display();
+    if (particles[i].isDead()) {
       particles.splice(i, 1);
     }
   }
+
+  // Reset blend mode setelah render
+  blendMode(BLEND);
 
   if (millis() - lastMouseMoveTime > 1000 && !mouseIsPressed && touches.length === 0) {
     particles = [];
@@ -72,10 +79,18 @@ function isInsideCanvas(x, y) {
 }
 
 function spawnParticle(x, y, movement) {
-  let tex = random(gradientTextures);
-  let alphaTarget = random(transparencies);
-  let contra = movement.copy().mult(-0.3);
-  particles.push(new Particle(x, y, tex, alphaTarget, contra));
+  let distance = movement.mag();
+
+  if (distance < 3) return;
+
+  let count = floor(map(distance, 1.5, 100, 1, 4, true)); 
+
+  for (let i = 0; i < count; i++) {
+    let tex = random(gradientTextures);
+    let alphaTarget = random(transparencies);
+    let contra = movement.copy().mult(-0.3 + random(-0.05, 0.05));
+    particles.push(new Particle(x, y, tex, alphaTarget, contra));
+  }
 }
 
 class Particle {
@@ -87,8 +102,8 @@ class Particle {
     this.tex = tex;
     this.alphaTarget = alphaTarget;
     this.alpha = 0;
-    this.fadeInDuration = 12; // 0.2s
-    this.size = random(13, 27); // kecil
+    this.fadeInDuration = 15;
+    this.size = random(13, 32);
   }
 
   update() {
