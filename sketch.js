@@ -1,7 +1,7 @@
 let particles = [];
 let lastMouseMoveTime = 0;
 let gradientTextures = [];
-let transparencies = [192, 128, 64]; // 75%, 50%, 25%
+let transparencies = [192, 128, 64];
 let lastMousePos = null;
 
 function setup() {
@@ -19,13 +19,11 @@ function setup() {
 
 function draw() {
   clear();
-  blendMode(BLEND); // Reset blending mode ke normal sebelum gambar apa pun
-
+  blendMode(BLEND);
   for (let i = particles.length - 1; i >= 0; i--) {
     particles[i].update();
   }
 
-  // Gambar partikel dengan blendMode ADD untuk efek kontras warna tumpang tindih
   blendMode(ADD);
   for (let i = particles.length - 1; i >= 0; i--) {
     particles[i].display();
@@ -34,7 +32,6 @@ function draw() {
     }
   }
 
-  // Reset blend mode setelah render
   blendMode(BLEND);
 
   if (millis() - lastMouseMoveTime > 1000 && !mouseIsPressed && touches.length === 0) {
@@ -111,17 +108,16 @@ class Particle {
     this.life -= 2;
     this.vel.mult(0.95);
 
-    // Fade in
     if (this.life > this.maxLife - this.fadeInDuration) {
       let t = 1 - (this.maxLife - this.life) / this.fadeInDuration;
       this.alpha = this.alphaTarget * t;
     }
-    // Fade out
+
     else if (this.life < 30) {
       let t = this.life / 30;
       this.alpha = this.alphaTarget * t;
     }
-    // Normal
+      
     else {
       this.alpha = this.alphaTarget;
     }
